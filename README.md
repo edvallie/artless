@@ -19,7 +19,7 @@ On Linux, your user needs access to the serial device, usually by joining the `d
 ## The roast clock
 
 artless reads and charts the roaster from the moment it connects, but the clock doesn't start until you press
-**Drop beans in**. That marks 0:00 (the *charge*), and the preheat already on the chart keeps its place at negative
+**Drop beans in**. That marks 0:00 (the _charge_), and the preheat already on the chart keeps its place at negative
 time. **Beans out**, or **Drop beans out** in the controls, marks the end; recording carries on afterwards so the
 cooling curve is kept too. **New roast** clears the recording.
 

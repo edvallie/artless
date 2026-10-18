@@ -63,7 +63,7 @@ artless/
 - Colors come from the tokens in `src/index.css`, and every token has a dark-mode value. Don't add raw hex.
 - UI copy is plain, in sentence case, and says what will happen to the beans. See the banners in `App.tsx` for the voice.
 - Files derived from Artisan keep their SPDX and copyright header. A new file ported from Artisan gets the same header.
-- Prettier and oxlint must be clean. The existing `react(purity)` warning on `Date.now` in `MachineDetails` is known.
+- Prettier (`npx prettier --check .`) and oxlint must be clean. The existing `react(purity)` warning on `Date.now` in `MachineDetails` is known.
 - **Leaving the page mid-roast ejects the beans**: the port closes and the watchdog fires. Pages go in `routes.tsx` under the shell, links between them use `Link`, and links off the site open in a new tab.
 
 ## Stop-ship rules
