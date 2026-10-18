@@ -66,7 +66,7 @@ artless sends one command per status frame, with no extra throttle.
 
 ## Safety
 
-While connected, artless is in control and the Hottop expects a command at least once a second. If none arrives, it ejects the beans. Commands go out in reply to the machine's own status frames, so keep the tab open and the cable connected. That watchdog is also the emergency stop: pull the cable (or press Disconnect) and the beans come out about a second later.
+While connected, artless is in control and the Hottop expects a command at least once a second. If none arrives, it ejects the beans. Commands go out in reply to the machine's own status frames, so keep the tab open and the cable connected. That watchdog is also the emergency stop: pull the cable (or press Disconnect) and the beans come out about a second later. Reloading or closing the tab does the same, so while connected the browser asks before it lets the page go.
 
 There's no take/release step and no temperature lock on connecting or disconnecting. Releasing would only ever mean "stop sending", which trips the watchdog just like unplugging.
 

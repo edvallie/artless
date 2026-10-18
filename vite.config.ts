@@ -29,7 +29,7 @@ export default defineConfig({
       // never lower them to get a run passing, and never set one below 90.
       thresholds: {
         statements: 97,
-        branches: 91,
+        branches: 92,
         functions: 96,
         lines: 99,
       },

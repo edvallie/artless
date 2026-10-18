@@ -54,6 +54,14 @@ export default function App() {
     return () => wakeLock.disable()
   }, [connected])
 
+  // Reloading or closing the tab closes the port too, so ask first.
+  useEffect(() => {
+    if (!connected) return
+    const onLeave = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', onLeave)
+    return () => window.removeEventListener('beforeunload', onLeave)
+  }, [connected])
+
   return (
     <div className="app">
       <header className="bar">

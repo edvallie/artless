@@ -186,6 +186,23 @@ describe('banners', () => {
   })
 })
 
+describe('leaving the site', () => {
+  const leave = () => {
+    const e = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(e)
+    return e.defaultPrevented
+  }
+
+  it('asks before a reload or a closed tab drops the roaster, and only while connected', async () => {
+    renderApp()
+    expect(leave()).toBe(false)
+    await connectFake()
+    expect(leave()).toBe(true)
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Disconnect' })))
+    expect(leave()).toBe(false)
+  })
+})
+
 describe('connecting to a Hottop', () => {
   function withSerial(requestPort: () => Promise<unknown>) {
     Object.defineProperty(navigator, 'serial', { configurable: true, value: { requestPort } })
