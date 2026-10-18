@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type { DriverSnapshot } from '../hottop/driver'
 import { roastLog, useRoast } from '../roastLog'
 import { driver } from '../state'
@@ -23,6 +23,7 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
           label="Heater"
           value={c.heater}
           reported={r.heater}
+          live={connected}
           onChange={(v) => driver.setHottop({ heater: v })}
           swatch="sw-heater"
         />
@@ -31,6 +32,7 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
           hint="Roasting airflow"
           value={c.mainFan}
           reported={r.mainFan}
+          live={connected}
           onChange={(v) => driver.setHottop({ mainFan: v })}
           step={10}
           swatch="sw-fan"
@@ -41,6 +43,7 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
           hint="Under the cooling tray"
           value={c.fan}
           reported={r.fan}
+          live={connected}
           onChange={(v) => driver.setHottop({ fan: v })}
           step={10}
           rangeClass="range-fan"
@@ -51,18 +54,21 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
             label="Drum motor"
             on={!!c.drumMotor}
             reported={!!r.drumMotor}
+            live={connected}
             onChange={(v) => driver.setHottop({ drumMotor: v })}
           />
           <Switch
             label="Cooling stirrer"
             on={!!c.coolingMotor}
             reported={!!r.coolingMotor}
+            live={connected}
             onChange={(v) => driver.setHottop({ coolingMotor: v })}
           />
           <Switch
             label="Eject door"
             on={!!c.solenoid}
             reported={!!r.solenoid}
+            live={connected}
             onChange={(v) => driver.setHottop({ solenoid: v })}
             onText="Open"
             offText="Closed"
@@ -102,8 +108,23 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
   )
 }
 
-function Reported({ show, children }: { show: boolean; children: React.ReactNode }) {
-  return <span className={show ? 'reported' : 'reported reported-same'}>{children}</span>
+/** A change takes a frame or two to come back from the Hottop, so only a disagreement that has held this long counts. */
+const MISMATCH_MS = 3000
+
+/** True once the Hottop has reported something other than `value` for MISMATCH_MS straight. Any change to either side
+ *  starts the clock again, so dragging a slider the machine is following never trips it. */
+function useMismatch<T>(value: T, reported: T, live: boolean): boolean {
+  const [held, setHeld] = useState(false)
+  const key = live && value !== reported ? `${value}|${reported}` : null
+  useEffect(() => {
+    if (key === null) return
+    const t = setTimeout(() => setHeld(true), MISMATCH_MS)
+    return () => {
+      clearTimeout(t)
+      setHeld(false)
+    }
+  }, [key])
+  return held
 }
 
 /** A 0–100 % output. The fans step by 10 %: the protocol only carries 0–10 for them, so finer steps couldn't
@@ -113,12 +134,15 @@ function Slider(props: {
   hint?: string
   value: number
   reported: number
+  live: boolean
   onChange: (v: number) => void
   step?: number
   swatch?: string
   rangeClass?: string
 }) {
   const id = useId()
+  const mismatch = useMismatch(props.value, props.reported, props.live)
+  const warning = `Hottop reports ${props.reported}%`
   return (
     <div className="ctl">
       <label htmlFor={id} className="ctl-label">
@@ -126,8 +150,12 @@ function Slider(props: {
         {props.label}
         {props.hint && <span className="hint">{props.hint}</span>}
       </label>
-      <output htmlFor={id} className="ctl-value">
-        {props.value}%
+      <output
+        htmlFor={id}
+        className={mismatch ? 'ctl-value mismatch' : 'ctl-value'}
+        title={mismatch ? warning : undefined}
+      >
+        {props.value}%{mismatch && <span className="sr-only">. {warning}</span>}
       </output>
       <input
         id={id}
@@ -139,9 +167,6 @@ function Slider(props: {
         value={props.value}
         onChange={(e) => props.onChange(Number(e.target.value))}
       />
-      <div className="ctl-row">
-        <Reported show={props.reported !== props.value}>Hottop reports {props.reported}%</Reported>
-      </div>
     </div>
   )
 }
@@ -150,25 +175,26 @@ function Switch(props: {
   label: string
   on: boolean
   reported: boolean
+  live: boolean
   onChange: (v: boolean) => void
   onText?: string
   offText?: string
 }) {
   const onText = props.onText ?? 'On'
   const offText = props.offText ?? 'Off'
+  const mismatch = useMismatch(props.on, props.reported, props.live)
+  const warning = `Hottop reports ${(props.reported ? onText : offText).toLowerCase()}`
   return (
-    <div className="switch">
-      <button
-        className={props.on ? 'toggle toggle-on' : 'toggle'}
-        aria-pressed={props.on}
-        onClick={() => props.onChange(!props.on)}
-      >
-        <span className="toggle-label">{props.label}</span>
-        <span className="toggle-state">{props.on ? onText : offText}</span>
-      </button>
-      <Reported show={props.reported !== props.on}>
-        Hottop reports {props.reported ? onText.toLowerCase() : offText.toLowerCase()}
-      </Reported>
-    </div>
+    <button
+      className={props.on ? 'toggle toggle-on' : 'toggle'}
+      aria-pressed={props.on}
+      onClick={() => props.onChange(!props.on)}
+    >
+      <span className="toggle-label">{props.label}</span>
+      <span className={mismatch ? 'toggle-state mismatch' : 'toggle-state'} title={mismatch ? warning : undefined}>
+        {props.on ? onText : offText}
+        {mismatch && <span className="sr-only">. {warning}</span>}
+      </span>
+    </button>
   )
 }

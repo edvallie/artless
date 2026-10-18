@@ -2,7 +2,7 @@
 // The control panel drives the real driver singleton through a fake transport, so each test
 // checks what would actually go out to the roaster.
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { FRAME_LENGTH, checksum } from '../hottop/protocol'
 import type { Transport, TransportHandlers } from '../hottop/transport'
 import { roastLog } from '../roastLog'
@@ -60,6 +60,79 @@ afterEach(async () => {
   await driver.disconnect()
   driver.clearSetpoints()
   roastLog.newRoast()
+  vi.useRealTimers()
+})
+
+describe('when the Hottop disagrees', () => {
+  const heater = () => screen.getByLabelText('Heater').closest('.ctl')!.querySelector('output')!
+  const drum = () => screen.getByRole('button', { name: /Drum motor/ }).querySelector('.toggle-state')!
+  const frame = (f: Parameters<typeof statusFrame>[0] = {}) => act(() => t.handlers.onData(statusFrame(f)))
+  const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  it('turns the value red, with what the machine says on hover, after 3 s of disagreeing', async () => {
+    render(<Panel />)
+    await connectWithReading()
+    fireEvent.change(screen.getByLabelText('Heater'), { target: { value: '85' } })
+    wait(2999)
+    expect(heater().className).not.toContain('mismatch')
+    expect(heater().title).toBe('')
+
+    wait(1)
+    expect(heater().className).toContain('mismatch')
+    expect(heater().title).toBe('Hottop reports 40%')
+    expect(heater().textContent).toBe('85%. Hottop reports 40%') // the second half is for screen readers
+
+    frame({ heater: 85 })
+    expect(heater().className).not.toContain('mismatch')
+    expect(heater().title).toBe('')
+  })
+
+  it('starts the 3 s again whenever either side changes', async () => {
+    render(<Panel />)
+    await connectWithReading()
+    fireEvent.change(screen.getByLabelText('Heater'), { target: { value: '85' } })
+    wait(2000)
+    fireEvent.change(screen.getByLabelText('Heater'), { target: { value: '90' } })
+    wait(2000)
+    frame({ heater: 50 })
+    wait(2999)
+    expect(heater().className).not.toContain('mismatch')
+    wait(1)
+    expect(heater().title).toBe('Hottop reports 50%')
+  })
+
+  it('does the same for the switches', async () => {
+    render(<Panel />)
+    await connectWithReading()
+    fireEvent.click(screen.getByRole('button', { name: /Drum motor/ }))
+    wait(3000)
+    expect(drum().className).toContain('mismatch')
+    expect(drum().getAttribute('title')).toBe('Hottop reports on')
+
+    fireEvent.click(screen.getByRole('button', { name: /Eject door/ }))
+    wait(3000)
+    expect(
+      screen
+        .getByRole('button', { name: /Eject door/ })
+        .querySelector('.toggle-state')!
+        .getAttribute('title'),
+    ).toBe('Hottop reports closed')
+  })
+
+  it('says nothing once the roaster is gone', async () => {
+    render(<Panel />)
+    await connectWithReading()
+    fireEvent.change(screen.getByLabelText('Heater'), { target: { value: '85' } })
+    wait(3000)
+    await act(() => driver.disconnect())
+    expect(heater().className).not.toContain('mismatch')
+    wait(3000)
+    expect(heater().className).not.toContain('mismatch')
+  })
 })
 
 describe('control panel', () => {
@@ -92,17 +165,15 @@ describe('control panel', () => {
     expect(screen.getByLabelText('Heater')).toMatchObject({ value: '40' })
     expect(screen.getByLabelText(/Main fan/)).toMatchObject({ value: '60' })
     expect(screen.getByRole('button', { name: /Drum motor/ }).getAttribute('aria-pressed')).toBe('true')
-    // nothing overridden yet, so no "Hottop reports" differences are shown
-    expect(document.querySelectorAll('.reported:not(.reported-same)')).toHaveLength(0)
+    expect(document.querySelectorAll('.mismatch')).toHaveLength(0)
   })
 
-  it('moves the heater with the slider and shows the machine still reporting the old value', async () => {
+  it('moves the heater with the slider', async () => {
     render(<Panel />)
     await connectWithReading()
     fireEvent.change(screen.getByLabelText('Heater'), { target: { value: '85' } })
     expect(setpoints().heater).toBe(85)
     expect(screen.getByText('85%')).toBeTruthy()
-    expect(screen.getByText('Hottop reports 40%').className).toBe('reported')
 
     act(() => t.handlers.onData(statusFrame()))
     expect(lastSent()[10]).toBe(85)
@@ -116,7 +187,6 @@ describe('control panel', () => {
     fireEvent.change(screen.getByLabelText(/Cooling fan/), { target: { value: '30' } })
     expect(setpoints()).toMatchObject({ mainFan: 90, fan: 30 })
     expect(screen.getByText('90%')).toBeTruthy()
-    expect(screen.getByText('Hottop reports 60%')).toBeTruthy()
 
     act(() => t.handlers.onData(statusFrame()))
     expect([lastSent()[11], lastSent()[12]]).toEqual([3, 9])
@@ -129,7 +199,6 @@ describe('control panel', () => {
     expect(door.textContent).toContain('Closed')
     fireEvent.click(door)
     expect(door.textContent).toContain('Open')
-    expect(screen.getByText('Hottop reports closed')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: /Drum motor/ }))
     fireEvent.click(screen.getByRole('button', { name: /Cooling stirrer/ }))

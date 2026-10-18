@@ -483,8 +483,7 @@
   padding: 14px 0;
   border-bottom: 1px solid var(--grid);
 }
-.ctl > input[type='range'],
-.ctl > .ctl-row {
+.ctl > input[type='range'] {
   grid-column: 1 / -1;
 }
 .ctl-label {
@@ -504,18 +503,8 @@
   font-weight: 600;
   line-height: 1;
 }
-.ctl-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 22px;
-}
-.reported {
-  font-size: 13px;
-  color: var(--ink-2);
-}
-.reported-same {
-  visibility: hidden;
+.ctl-value.mismatch {
+  color: var(--critical);
 }
 
 input[type='range'] {
@@ -568,11 +557,12 @@ input.range-fan {
   background: var(--ink);
   color: var(--surface);
 }
-.switch .reported {
-  padding-left: 12px;
+.toggle-state.mismatch {
+  color: var(--critical);
 }
-.switch .reported-same {
-  display: none;
+.toggle-on .toggle-state.mismatch {
+  background: var(--critical);
+  color: var(--surface);
 }
 
 .actions {
