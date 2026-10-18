@@ -12,7 +12,7 @@ artless is a browser control panel for the Hottop 2K+ coffee roaster. It reads a
 
 ## Tech Stack
 
-- **App:** Vite + React 19, plain CSS (tokens in `src/index.css`, layout in `src/App.css`). No UI library, no router, no state library: stores are small classes read through `useSyncExternalStore`
+- **App:** Vite + React 19, plain CSS (tokens in `src/index.css`, layout in `src/App.css`). React Router in data mode (`createBrowserRouter`, routes in `src/routes.tsx`). No UI library, no state library: stores are small classes read through `useSyncExternalStore`
 - **Serial:** Web Serial (`@types/w3c-web-serial`), so only Chrome, Edge and Opera on desktop, from `localhost` or HTTPS
 - **Language:** TypeScript strict
 - **Tests:** Vitest + `@vitest/coverage-v8`; UI tests use Testing Library + `happy-dom`
@@ -33,10 +33,12 @@ artless/
 │   │   ├── simulator.ts       a pretend roaster (made-up thermal model, real frames and watchdog)
 │   │   └── reference-vectors.json  600 frames from the reference implementation
 │   ├── components/            ControlPanel, RoastChart
+│   ├── pages/                 Roaster (readouts, chart, controls, link details), About, NotFound
 │   ├── roastLog.ts            the recording: frames, commands, events, samples, roast clock, export
 │   ├── state.ts               the driver singleton, units, debug mode, formatters
 │   ├── wakeLock.ts            blocks idle sleep while connected
-│   └── App.tsx                shell: top bar, banners, settings drawer, readouts, link details
+│   ├── routes.tsx             every page, inside the shell
+│   └── App.tsx                shell: top bar, banners, settings drawer, footer
 ├── public/                    favicon
 └── AGENTS.md                  (this file)
 ```
@@ -62,6 +64,7 @@ artless/
 - UI copy is plain, in sentence case, and says what will happen to the beans. See the banners in `App.tsx` for the voice.
 - Files derived from Artisan keep their SPDX and copyright header. A new file ported from Artisan gets the same header.
 - Prettier and oxlint must be clean. The existing `react(purity)` warning on `Date.now` in `MachineDetails` is known.
+- **Leaving the page mid-roast ejects the beans**: the port closes and the watchdog fires. Pages go in `routes.tsx` under the shell, links between them use `Link`, and links off the site open in a new tab.
 
 ## Stop-ship rules
 

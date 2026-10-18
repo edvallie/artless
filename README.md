@@ -9,7 +9,7 @@ npm install
 npm run dev      # http://localhost:5173
 npm test         # unit and UI tests, including the driver against reference frames
 npm run test:coverage  # the same, failing below the coverage floors in vite.config.ts
-npm run build    # static files in dist/
+npm run build    # static files in dist/, with a copy of index.html as 404.html for GitHub Pages
 ```
 
 Connecting to the roaster uses Web Serial, which needs **Chrome, Edge or Opera on desktop** and a page served from `localhost` or HTTPS. The simulator works in any browser.
@@ -74,6 +74,9 @@ A sleeping computer is the same thing as an unplugged cable, so while the roaste
 
 ## Layout
 
+- `src/App.tsx`: the shell around every page, with the top bar, banners, settings drawer and footer. Moving between pages
+  leaves the connection and the recording alone; leaving the site doesn't, so links off it open in a new tab.
+- `src/routes.tsx` and `src/pages/`: the roaster, About and not-found pages
 - `src/hottop/protocol.ts`: frame format, checksum, encode/decode, stream parser
 - `src/hottop/driver.ts`: control logic, setpoints and safety cutoff
 - `src/hottop/webSerial.ts`: 115200 8N1 serial transport

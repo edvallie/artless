@@ -22,6 +22,10 @@
   line-height: 1;
   color: var(--bt);
 }
+.mark a {
+  color: inherit;
+  text-decoration: none;
+}
 
 .conn {
   margin: 0;
@@ -189,6 +193,31 @@
 
 .note {
   margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---- text pages ---- */
+
+.page {
+  max-width: 720px;
+}
+
+.prose h3 {
+  margin-top: 20px;
+  font-size: 15px;
+}
+.prose p {
+  margin: 8px 0 0;
+  color: var(--ink-2);
+}
+.prose a,
+.foot a {
+  color: var(--et);
+}
+
+.foot {
+  margin-top: 32px;
   font-size: 14px;
   color: var(--muted);
 }
