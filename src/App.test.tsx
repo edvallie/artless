@@ -339,12 +339,12 @@ describe('pages', () => {
   const footer = () => screen.getByRole('contentinfo')
   const keepTabOpen = /Keep this tab open and the cable connected while you roast/
 
-  it('warns about the watchdog in the footer of every page, and on the About page', () => {
+  it('warns about the watchdog in the footer of every page', () => {
     renderApp()
     expect(within(footer()).getByText(keepTabOpen)).toBeTruthy()
     fireEvent.click(within(footer()).getByRole('link', { name: 'About artless' }))
     expect(within(footer()).getByText(keepTabOpen)).toBeTruthy()
-    expect(within(screen.getByRole('main')).getByText(keepTabOpen)).toBeTruthy()
+    expect(within(screen.getByRole('main')).queryByText(keepTabOpen)).toBeNull()
   })
 
   it('keeps the roast running, recording and in sight of the banners on the About page', async () => {

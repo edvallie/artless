@@ -28,10 +28,6 @@ export function About() {
           so stay with the roaster while it runs. The safety cutoff and the Hottop’s own watchdog are there for when
           something goes wrong, not instead of you.
         </p>
-        <p>
-          Keep this tab open and the cable connected while you roast. If the Hottop hears nothing for about a second, it
-          ejects the beans.
-        </p>
 
         <h3>Source code</h3>
         <p>
