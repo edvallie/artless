@@ -133,13 +133,33 @@ describe('settings drawer and debug mode', () => {
     expect(screen.getByText('Not connected')).toBeTruthy()
   })
 
+  it('loads a new batch into the simulator once the beans are out', async () => {
+    vi.useFakeTimers()
+    renderApp()
+    turnOnDebug()
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Run simulator' })))
+    const sim = screen.getByRole('region', { name: 'Simulator' })
+    const load = () => within(sim).getByRole('button', { name: 'Load a new batch' })
+    await act(() => vi.advanceTimersByTimeAsync(250))
+    expect(load()).toMatchObject({ disabled: true })
+
+    fireEvent.click(screen.getByRole('button', { name: /Drop beans out/ }))
+    await act(() => vi.advanceTimersByTimeAsync(500))
+    expect(within(sim).getByText('In the cooling tray')).toBeTruthy()
+
+    fireEvent.click(load())
+    expect(within(sim).getByText('In the drum')).toBeTruthy()
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Disconnect' })))
+  })
+
   it('reports frames, sleep blocking and the checksum switch in the link details', async () => {
     renderApp()
     turnOnDebug()
     const { frame } = await connectFake()
+    const { framesOk, framesBad } = driver.getSnapshot() // the counters last the page's lifetime, not one link's
     frame(150)
     const details = screen.getByRole('region', { name: 'Machine and link' })
-    expect(within(details).getByText('1 good, 0 rejected')).toBeTruthy()
+    expect(within(details).getByText(`${framesOk + 1} good, ${framesBad} rejected`)).toBeTruthy()
     expect(within(details).getByText('Not blocked')).toBeTruthy() // happy-dom has no wake lock
     expect(within(details).getByText(/Recorded data \(1 samples/)).toBeTruthy()
 

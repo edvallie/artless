@@ -248,7 +248,7 @@ export function RoastChart({ samples, roast, unit }: { samples: Sample[]; roast:
           </div>
           <div>
             <i className="sw sw-fan" />
-            Main fan <b>{hover.mainFan / 10} of 10</b>
+            Main fan <b>{hover.mainFan}%</b>
           </div>
         </div>
       )}

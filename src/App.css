@@ -484,7 +484,6 @@
   border-bottom: 1px solid var(--grid);
 }
 .ctl > input[type='range'],
-.ctl > .ticks,
 .ctl > .ctl-row {
   grid-column: 1 / -1;
 }
@@ -504,12 +503,6 @@
   font-size: 26px;
   font-weight: 600;
   line-height: 1;
-}
-.ctl-value small {
-  font-family: var(--font);
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
 }
 .ctl-row {
   display: flex;
@@ -544,25 +537,6 @@ input[type='range'] {
 
 input.range-fan {
   accent-color: var(--fan);
-}
-
-/* Labels under the fan slider. Each is one thumb wide, so with space-between
-   their centres land where the thumb's centre sits at each step. */
-.ticks {
-  display: flex;
-  justify-content: space-between;
-  margin-top: -4px;
-}
-.tick {
-  width: 16px;
-  text-align: center;
-  font-family: var(--font-num);
-  font-size: 12px;
-  color: var(--muted);
-}
-.tick-on {
-  color: var(--ink);
-  font-weight: 700;
 }
 
 .switches {

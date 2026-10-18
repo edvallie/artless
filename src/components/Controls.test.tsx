@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 // The control panel drives the real driver singleton through a fake transport, so each test
 // checks what would actually go out to the roaster.
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { FRAME_LENGTH, checksum } from '../hottop/protocol'
 import type { Transport, TransportHandlers } from '../hottop/transport'
@@ -90,7 +90,7 @@ describe('control panel', () => {
     render(<Panel />)
     await connectWithReading()
     expect(screen.getByLabelText('Heater')).toMatchObject({ value: '40' })
-    expect(screen.getByLabelText(/Main fan/)).toMatchObject({ value: '6' })
+    expect(screen.getByLabelText(/Main fan/)).toMatchObject({ value: '60' })
     expect(screen.getByRole('button', { name: /Drum motor/ }).getAttribute('aria-pressed')).toBe('true')
     // nothing overridden yet, so no "Hottop reports" differences are shown
     expect(document.querySelectorAll('.reported:not(.reported-same)')).toHaveLength(0)
@@ -116,16 +116,34 @@ describe('control panel', () => {
     expect(screen.getByText('85%')).toBeTruthy()
   })
 
-  it('snaps the fans to the machine’s 11 steps', async () => {
+  it('sets the fans in percent, 10 % at a time, and sends the machine its 0–10', async () => {
     render(<Panel />)
     await connectWithReading()
-    fireEvent.change(screen.getByLabelText(/Main fan/), { target: { value: '9' } })
-    fireEvent.change(screen.getByLabelText(/Cooling fan/), { target: { value: '3' } })
+    fireEvent.change(screen.getByLabelText(/Main fan/), { target: { value: '90' } })
+    fireEvent.change(screen.getByLabelText(/Cooling fan/), { target: { value: '30' } })
     expect(setpoints()).toMatchObject({ mainFan: 90, fan: 30 })
-    expect(screen.getByText('Hottop reports 6')).toBeTruthy()
+    expect(screen.getByText('90%')).toBeTruthy()
+    expect(screen.getByText('Hottop reports 60%')).toBeTruthy()
 
     act(() => t.handlers.onData(statusFrame()))
     expect([lastSent()[11], lastSent()[12]]).toEqual([3, 9])
+  })
+
+  it('nudges the fans by 10 % and stops at the ends', async () => {
+    render(<Panel />)
+    await connectWithReading()
+    const mainFan = screen.getByLabelText(/Main fan/).closest('.ctl')!
+    const nudge = (name: string) => fireEvent.click(within(mainFan as HTMLElement).getByRole('button', { name }))
+    expect(
+      within(mainFan as HTMLElement)
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['−10', '+10'])
+    nudge('+10')
+    expect(setpoints().mainFan).toBe(70)
+    for (let i = 0; i < 5; i++) nudge('+10')
+    expect(setpoints().mainFan).toBe(100)
+    expect(screen.getByLabelText(/Main fan/)).toMatchObject({ step: '10' })
   })
 
   it('switches the motors and the door', async () => {

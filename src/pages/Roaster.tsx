@@ -224,8 +224,8 @@ function MachineDetails({
                 <th scope="col">BT °{unit}</th>
                 <th scope="col">ET °{unit}</th>
                 <th scope="col">Heater %</th>
-                <th scope="col">Main fan</th>
-                <th scope="col">Cooling fan</th>
+                <th scope="col">Main fan %</th>
+                <th scope="col">Cooling fan %</th>
               </tr>
             </thead>
             <tbody>
@@ -238,8 +238,8 @@ function MachineDetails({
                     <td>{fmtTemp(s.bt, unit)}</td>
                     <td>{fmtTemp(s.et, unit)}</td>
                     <td>{s.heater}</td>
-                    <td>{s.mainFan / 10}</td>
-                    <td>{s.fan / 10}</td>
+                    <td>{s.mainFan}</td>
+                    <td>{s.fan}</td>
                   </tr>
                 ))}
             </tbody>

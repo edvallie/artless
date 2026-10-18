@@ -54,7 +54,7 @@ Everything needed to replay a roast exactly, not just the chart series:
   and a data table
 - artless controls the roaster the whole time it's connected. There's no read-only mode or take/release step.
   Until you touch a control, every output echoes what the Hottop reports, so connecting changes nothing.
-- Heater 0–100 %, main fan and cooling fan in the machine's 11 steps, and on/off for drum motor, cooling stirrer and eject door
+- Heater 0–100 %, main fan and cooling fan 0–100 % in 10 % steps (the protocol carries 0–10 for the fans), and on/off for drum motor, cooling stirrer and eject door
 - **Drop beans out**: one button sets heater off, door open, drum and stirrer on, cooling fan at 10, and ends the roast
 - **Follow the machine's values**: clears every override so each output echoes what the Hottop reports
 - The safety cutoff: at 220 °C BT, the heater goes off, the main fan goes to max, the door opens, and the drum and stirrer run

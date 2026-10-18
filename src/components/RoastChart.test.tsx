@@ -104,7 +104,7 @@ describe('roast chart', () => {
     expect(tip.querySelector('.tt-time')?.textContent).toBe('2:00')
     expect(tip.textContent).toContain('BT 160°')
     expect(tip.textContent).toContain('Heater 60%')
-    expect(tip.textContent).toContain('Main fan 3 of 10')
+    expect(tip.textContent).toContain('Main fan 30%')
     expect(document.querySelector('.crosshair')).not.toBeNull()
 
     fireEvent.pointerMove(hit, { clientX: 350 }) // 4:50, past the last sample: the nearest is 4:00
