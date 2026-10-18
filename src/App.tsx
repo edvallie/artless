@@ -160,6 +160,10 @@ export default function App() {
       <Outlet context={{ unit, debug, sim } satisfies ShellContext} />
 
       <footer className="foot">
+        <p>
+          Keep this tab open and the cable connected while you roast. If the Hottop hears nothing for about a second, it
+          ejects the beans.
+        </p>
         <Link to="/about">About artless</Link>
       </footer>
 

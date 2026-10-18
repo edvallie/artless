@@ -221,6 +221,9 @@
   font-size: 14px;
   color: var(--muted);
 }
+.foot p {
+  margin: 0 0 6px;
+}
 
 /* ---- readouts: the loud part ---- */
 
@@ -456,16 +459,8 @@
   margin-bottom: 4px;
   border-bottom: 1px solid var(--rule);
 }
-.control-head h2 {
-  margin-bottom: 12px;
-}
-.keepalive {
-  margin: 0;
-  padding: 8px 10px;
-  border-radius: 4px;
-  background: var(--surface-2);
-  font-size: 14px;
-  color: var(--ink);
+.control-head .note {
+  margin-top: 8px;
 }
 
 .outputs {
@@ -619,11 +614,14 @@ input.range-fan {
 .actions {
   padding-top: 16px;
 }
+.btn-charge,
 .btn-drop {
   width: 100%;
   padding-block: 11px;
   font-size: 17px;
   font-weight: 600;
+}
+.btn-drop {
   background: var(--bt);
   border-color: var(--bt);
   color: #fff;
@@ -631,6 +629,9 @@ input.range-fan {
 .btn-drop:hover:not(:disabled) {
   filter: brightness(1.1);
   border-color: var(--bt);
+}
+.btn-charge + .note {
+  margin-bottom: 16px;
 }
 .actions .btn-quiet {
   margin-top: 12px;

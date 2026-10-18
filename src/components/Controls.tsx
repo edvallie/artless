@@ -1,25 +1,19 @@
 import { useId } from 'react'
 import type { DriverSnapshot } from '../hottop/driver'
-import { roastLog } from '../roastLog'
+import { roastLog, useRoast } from '../roastLog'
 import { driver } from '../state'
 
 export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
   const r = snap.readings
   const c = snap.commanded
   const connected = snap.connection === 'connected' && snap.hasReadings
+  const roast = useRoast()
 
   return (
     <section className="panel controls" aria-labelledby="controls-h">
       <div className="control-head">
         <h2 id="controls-h">Roaster controls</h2>
-        {connected ? (
-          <p className="keepalive" role="note">
-            Keep this tab open and the cable connected. If the Hottop hears nothing for about a second, it ejects the
-            beans.
-          </p>
-        ) : (
-          <p className="note">Connect to the roaster first.</p>
-        )}
+        {!connected && <p className="note">Connect to the roaster first.</p>}
       </div>
 
       <fieldset disabled={!connected} className="outputs">
@@ -72,6 +66,16 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
         </div>
 
         <div className="actions">
+          {roast.phase === 'idle' && (
+            <>
+              <button className="btn btn-strong btn-charge" onClick={() => roastLog.charge()}>
+                Drop beans in
+              </button>
+              <p className="note">
+                Starts the roast clock at 0:00. The preheat already on the chart keeps its place, at negative time.
+              </p>
+            </>
+          )}
           <button
             className="btn btn-drop"
             onClick={() => {

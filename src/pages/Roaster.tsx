@@ -23,7 +23,7 @@ export function Roaster() {
           <Readouts snap={snap} roast={roast} unit={unit} />
           <RoastChart samples={samples} roast={roast} unit={unit} />
           <div className="chart-foot">
-            <RoastBar roast={roast} samples={samples} />
+            <RoastBar roast={roast} />
           </div>
         </section>
         {debug && <MachineDetails snap={snap} samples={samples} roast={roast} unit={unit} />}
@@ -94,21 +94,9 @@ function downloadRoast() {
 
 /** The roast clock lives here: readings are recorded from the moment of connection, but 0:00 is
  *  the moment the beans go in. */
-function RoastBar({ roast, samples }: { roast: RoastMeta; samples: Sample[] }) {
+function RoastBar({ roast }: { roast: RoastMeta }) {
   return (
     <div className="roast-bar">
-      {roast.phase === 'idle' && (
-        <>
-          <button className="btn btn-strong" onClick={() => roastLog.charge()} disabled={!samples.length}>
-            Drop beans in
-          </button>
-          <p className="note">
-            {samples.length
-              ? 'Starts the roast clock at 0:00. The preheat already on the chart keeps its place, at negative time.'
-              : 'Waiting for readings. The chart records as soon as the roaster sends them.'}
-          </p>
-        </>
-      )}
       {roast.phase === 'roasting' && (
         <>
           <button className="btn btn-strong" onClick={() => roastLog.beansOut()}>

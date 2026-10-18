@@ -229,8 +229,7 @@ describe('roast buttons', () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(T0)
     renderApp()
-    expect(screen.getByRole('button', { name: 'Drop beans in' })).toMatchObject({ disabled: true })
-    expect(screen.getByText(/Waiting for readings/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Drop beans in' }).closest('fieldset')?.disabled).toBe(true)
 
     const { frame } = await connectFake()
     frame(150)
@@ -273,10 +272,60 @@ describe('roast buttons', () => {
     expect(saved).toMatchObject({ format: 'artless.roast', chargeAt: T0 })
     expect(saved.frames).toHaveLength(1)
   })
+
+  it('names a recording that never started after its first frame', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(T0 + 60_000)
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:roast')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+    const clicked: HTMLAnchorElement[] = []
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      clicked.push(this)
+    })
+
+    renderApp()
+    const { frame } = await connectFake()
+    frame(150)
+    fireEvent.click(screen.getByRole('button', { name: 'Download roast' }))
+    expect(clicked[0].download).toBe('roast-2026-10-12-09-01.json')
+  })
+})
+
+describe('readouts', () => {
+  it('shows the BT rate of rise once it has 10 s of frames, signed and in the chosen unit', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    renderApp()
+    const ror = () => screen.getByText('BT rate of rise').closest('div')!.querySelector('dd')!.textContent
+    const { frame } = await connectFake()
+    expect(ror()).toBe('—°/min')
+
+    for (let i = 0; i <= 20; i++) {
+      vi.setSystemTime(T0 + i * 1000)
+      frame(150 + i) // 1 °C a second
+    }
+    expect(ror()).toBe('+60.0°/min')
+    fireEvent.click(screen.getByRole('button', { name: '°F' }))
+    expect(ror()).toBe('+108.0°/min')
+
+    for (let i = 21; i <= 60; i++) {
+      vi.setSystemTime(T0 + i * 1000)
+      frame(170 - (i - 20))
+    }
+    expect(ror()).toBe('−108.0°/min')
+  })
 })
 
 describe('pages', () => {
   const footer = () => screen.getByRole('contentinfo')
+  const keepTabOpen = /Keep this tab open and the cable connected while you roast/
+
+  it('warns about the watchdog in the footer of every page, and on the About page', () => {
+    renderApp()
+    expect(within(footer()).getByText(keepTabOpen)).toBeTruthy()
+    fireEvent.click(within(footer()).getByRole('link', { name: 'About artless' }))
+    expect(within(footer()).getByText(keepTabOpen)).toBeTruthy()
+    expect(within(screen.getByRole('main')).getByText(keepTabOpen)).toBeTruthy()
+  })
 
   it('keeps the roast running, recording and in sight of the banners on the About page', async () => {
     renderApp()

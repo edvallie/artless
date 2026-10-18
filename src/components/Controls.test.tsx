@@ -74,7 +74,16 @@ describe('control panel', () => {
 
     act(() => t.handlers.onData(statusFrame()))
     expect(screen.getByRole('button', { name: /Drop beans out/ }).closest('fieldset')?.disabled).toBe(false)
-    expect(screen.getByRole('note').textContent).toMatch(/ejects the\s+beans/)
+    expect(screen.queryByText('Connect to the roaster first.')).toBeNull()
+  })
+
+  it('drops the beans in from beside the controls, then gets out of the way', async () => {
+    render(<Panel />)
+    await connectWithReading()
+    fireEvent.click(screen.getByRole('button', { name: 'Drop beans in' }))
+    expect(roastLog.getMeta().phase).toBe('roasting')
+    expect(screen.queryByRole('button', { name: 'Drop beans in' })).toBeNull()
+    expect(screen.getByRole('button', { name: /Drop beans out/ })).toBeTruthy()
   })
 
   it('starts by showing what the machine reports', async () => {
