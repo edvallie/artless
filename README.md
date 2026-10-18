@@ -1,6 +1,6 @@
 # artless
 
-A browser control panel for the Hottop 2K+. It reads and drives the roaster over USB serial.
+A browser control panel for the Hottop 2K+ coffee roaster. It reads and drives the roaster over USB serial.
 
 ## Run it
 
