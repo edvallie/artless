@@ -3,8 +3,6 @@ import type { DriverSnapshot } from '../hottop/driver'
 import { roastLog, useRoast } from '../roastLog'
 import { driver } from '../state'
 
-const FAN_NUDGES = [-10, +10]
-
 export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
   const r = snap.readings
   const c = snap.commanded
@@ -35,7 +33,6 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
           reported={r.mainFan}
           onChange={(v) => driver.setHottop({ mainFan: v })}
           step={10}
-          nudges={FAN_NUDGES}
           swatch="sw-fan"
           rangeClass="range-fan"
         />
@@ -46,7 +43,6 @@ export function ControlPanel({ snap }: { snap: DriverSnapshot }) {
           reported={r.fan}
           onChange={(v) => driver.setHottop({ fan: v })}
           step={10}
-          nudges={FAN_NUDGES}
           rangeClass="range-fan"
         />
 
@@ -119,12 +115,10 @@ function Slider(props: {
   reported: number
   onChange: (v: number) => void
   step?: number
-  nudges?: number[]
   swatch?: string
   rangeClass?: string
 }) {
   const id = useId()
-  const step = props.step ?? 1
   return (
     <div className="ctl">
       <label htmlFor={id} className="ctl-label">
@@ -141,19 +135,12 @@ function Slider(props: {
         className={props.rangeClass}
         min={0}
         max={100}
-        step={step}
+        step={props.step ?? 1}
         value={props.value}
         onChange={(e) => props.onChange(Number(e.target.value))}
       />
       <div className="ctl-row">
         <Reported show={props.reported !== props.value}>Hottop reports {props.reported}%</Reported>
-        <span className="nudges">
-          {(props.nudges ?? [-5, -1, +1, +5]).map((d) => (
-            <button key={d} className="btn btn-nudge" onClick={() => props.onChange(props.value + d)}>
-              {d > 0 ? `+${d}` : `−${-d}`}
-            </button>
-          ))}
-        </span>
       </div>
     </div>
   )

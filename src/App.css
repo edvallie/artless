@@ -517,16 +517,6 @@
 .reported-same {
   visibility: hidden;
 }
-.nudges {
-  margin-left: auto;
-  display: inline-flex;
-  gap: 4px;
-}
-.btn-nudge {
-  padding: 3px 8px;
-  font-size: 13px;
-  min-width: 36px;
-}
 
 input[type='range'] {
   width: 100%;
