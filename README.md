@@ -16,6 +16,11 @@ Connecting to the roaster uses Web Serial, which needs **Chrome, Edge or Opera o
 
 On Linux, your user needs access to the serial device, usually by joining the `dialout` group (`sudo usermod -aG dialout $USER`, then log out and back in).
 
+## Deploying
+
+Pushing to `main` deploys the site to GitHub Pages through `.github/workflows/deploy.yml`. Prettier, oxlint, the tests
+with their coverage floors and the build all have to pass first, or nothing deploys.
+
 ## The roast clock
 
 artless reads and charts the roaster from the moment it connects, but the clock doesn't start until you press
